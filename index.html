@@ -66,13 +66,6 @@ progetto che copiava a sua volta lo stile di google*/
     z-index: 0; 
     transition: width 1s ease; 
 }
-/*<!-- Wrapper dei bottoni centrato -->*/
-<div id="bottom-buttons" style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%); display:flex; gap:16px; z-index:60;">
-    <!-- Bottone statistiche -->
-    <div id="stats-btn" style="width:48px; height:48px; border-radius:50%; background:var(--primaryColor); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer;">📊</div>
-    <!-- Bottone player musicale -->
-    <div id="music-btn" style="width:48px; height:48px; border-radius:50%; background:#0061a4; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer;">🎵</div>
-</div>
 .content-z { 
     position: relative; 
     z-index: 1; 
@@ -137,8 +130,14 @@ header, main { width: 100%; max-width: 600px; text-align:center; }
 #input-container { width: 100%; max-width: 600px; display:flex; gap:12px; margin-top:32px; }
 
 /* Pannello statistiche */
-#stats-btn { position: fixed; bottom:24px; right:24px; width:48px; height:48px; border-radius:50%; background:var(--primaryColor); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:60; }
+#stats-btn, #music-btn { position: fixed; bottom:24px; width:48px; height:48px; border-radius:50%; background:var(--primaryColor); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:60; }
+/* Li avviciniamo entrambi al centro */
+#stats-btn { right:72px; } 
+#music-btn { left:72px; }
 #stats-panel { position: fixed; bottom:0; left:0; right:0; max-width:600px; margin:auto; background:white; border-radius:2rem 2rem 0 0; padding:24px; transform:translateY(100%); transition: transform 0.3s; z-index:55; }
+
+/* Player YouTube */
+#music-panel { position:fixed; bottom:-110%; left:50%; transform:translateX(-50%); width:100%; max-width:600px; background:white; border-radius:2rem 2rem 0 0; padding:24px; transition:0.3s; z-index:50; }
 </style>
 </head>
 
@@ -194,8 +193,8 @@ header, main { width: 100%; max-width: 600px; text-align:center; }
 </div>
 
 <!-- Player YouTube -->
-<div id="music-btn" style="position:fixed; bottom:24px; left:24px; width:48px; height:48px; border-radius:50%; background:#0061a4; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:60;">🎵</div>
-<div id="music-panel" style="position:fixed; bottom:-110%; left:50%; transform:-translate-x-1/2; width:100%; max-width:600px; background:white; border-radius:2rem 2rem 0 0; padding:24px; transition:0.3s; z-index:50;">
+<div id="music-btn">🎵</div>
+<div id="music-panel">
     <div class="flex justify-between items-center mb-4">
         <h3 class="font-bold text-lg">Music Player</h3>
         <button onclick="closeMusicPanel()" class="text-gray-500 font-bold text-xl">✕</button>
@@ -238,6 +237,7 @@ function updateStatsUI(){
     document.getElementById("stat-best-attempts").innerText=stats.bestAttempts!==null?stats.bestAttempts:"–";
     document.getElementById("stat-current-attempts").innerText=storicoTentativi.length;
 }
+function recordWin(){stats.totalWins++; if(stats.bestAttempts===null || storicoTentativi.length<stats.bestAttempts) stats.bestAttempts=storicoTentativi.length; saveStats(); updateStatsUI();}
 function toggleStatsPanel(){
     const p=document.getElementById("stats-panel");
     const isOpen = p.style.transform === "translateY(0%)";
@@ -253,7 +253,6 @@ var tag=document.createElement('script'); tag.src="https://www.youtube.com/ifram
 function openMusicPanel(){document.getElementById('music-panel').style.bottom="0";}
 function closeMusicPanel(){document.getElementById('music-panel').style.bottom="-110%";}
 function loadVideo(){let input=document.getElementById('yt-url').value; const regExp=/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/; const match=input.match(regExp); if(match&&match[2].length==11)player.loadVideoById(match[2]);}
-document.getElementById('music-btn').onclick = openMusicPanel;
 
 /* --- UI --- */
 const ui = {
@@ -267,10 +266,10 @@ const ui = {
     aiText: document.getElementById("ai-text"),
     aiLabel: document.getElementById("ai-label"),
     hintBtn: document.getElementById("btn-hint"),
-    statsBtn: document.getElementById("stats-btn")
+    statsBtn: document.getElementById("stats-btn"),
+    musicBtn: document.getElementById("music-btn")
 };
 
-/* --- Caricamento parole --- */
 /* --- Caricamento parole da file esterno --- 
 l'unica cosa che ho effettivamente 
 diviso dal resto perché stranamente non ha rotto nulla XD*/
@@ -377,10 +376,6 @@ ui.hintBtn.onclick = async function(){
 ui.sendBtn.onclick = gestisciInvio;
 ui.input.addEventListener("keydown", e=>e.key==="Enter"&&gestisciInvio());
 ui.statsBtn.onclick = toggleStatsPanel;
+ui.musicBtn.onclick = openMusicPanel;
 
-/* --- Avvio --- */
-caricaParole().then(avviaNuovaPartita);
-loadStats();
-</script>
-</body>
-</html>
+/*
