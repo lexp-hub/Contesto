@@ -1,0 +1,31 @@
+[
+    // Natura e Ambiente
+    "montagna", "oceano", "foresta", "vulcano", "tramonto", "giardino", "stella", "cascata", "deserto", "ghiacciaio", "fiume", "scogliera", "temporale", "arcobaleno", "pianeta",
+    "laguna", "prateria", "collina", "valle", "bosco", "isoletta", "canyon", "grotta", "savana", "tundra", "baia", "penisola", "luna", "sole", "cometa",
+    "aurora", "nuvola", "pioggia", "neve", "vento", "mare", "oceania", "terra", "erba", "fiore",
+
+    // Oggetti e Strumenti
+    "pianoforte", "computer", "telescopio", "scultura", "lanterna", "mosaico", "zaino", "orologio", "bussole", "macchina", "microscopio", "fotocamera", "violino", "penna", "mappa",
+    "martello", "cacciavite", "telefono", "tablet", "stampante", "monitor", "tastiera", "mouse", "scrivania", "sedia", "lampada", "specchio", "valigia", "borsa", "occhiali",
+    "televisione", "radio", "forchetta", "cucchiaio", "coltello", "piatto", "bicchiere", "tazza", "bottiglia", "chiave",
+
+    // Viaggi e Luoghi
+    "viaggio", "biblioteca", "astronave", "isola", "passaporto", "quartiere", "rifugio", "sentiero", "aeroporto", "castello", "metropoli", "stazione", "piazza", "villaggio", "museo",
+    "teatro", "cinema", "parco", "ponte", "porto", "autostrada", "galleria", "ristorante", "caffetteria", "hotel", "ostello", "camping", "resort", "fattoria", "università",
+    "scuola", "ospedale", "farmacia", "libreria", "negozio", "supermercato", "mercatino", "palestra", "stadio", "arena",
+
+    // Concetti e Vita
+    "amicizia", "espresso", "medicina", "architettura", "orizzonte", "avventura", "universo", "libertà", "memoria", "energia", "sogno", "coraggio", "destino", "equilibrio", "cultura",
+    "passione", "ispirazione", "motivazione", "creatività", "fantasia", "intuizione", "saggezza", "felicità", "tristezza", "amore", "odio", "paura", "speranza", "verità", "giustizia",
+    "rispetto", "fiducia", "onestà", "pazienza", "gentilezza", "forza", "silenzio", "rumore", "tempo", "spazio",
+
+    // Tecnologia e Scienza
+    "robot", "satellite", "algoritmo", "molecola", "elettricità", "laboratorio", "ingranaggio", "scoperta", "invenzione", "galassia", "atomo", "codice", "internet", "radar", "batteria",
+    "software", "hardware", "database", "rete", "server", "cloud", "intelligenza", "artificiale", "programma", "applicazione", "sensore", "laser", "quantistica", "biologia", "chimica",
+    "fisica", "astronomia", "geologia", "matematica", "statistica", "motore", "circuito", "elettrone", "prototipo", "innovazione",
+
+    // Quotidianità e Cibo
+    "colazione", "bicicletta", "finestra", "profumo", "cucina", "pane", "cioccolato", "mercato", "festival", "vacanza", "famiglia", "chitarra", "pennello", "quaderno", "scarpe",
+    "maglietta", "giacca", "pantaloni", "cappello", "guanti", "sciarpa", "letto", "cuscino", "coperta", "doccia", "sapone", "asciugamano", "specchio", "divano", "tappeto",
+    "gelato", "pizza", "pasta", "formaggio", "insalata", "zuppa", "riso", "pollo", "pesce", "torta"
+]
