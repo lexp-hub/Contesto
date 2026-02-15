@@ -103,11 +103,13 @@ footer { position: fixed; bottom:0; left:0; right:0; padding:16px; background:wh
 </main>
 
 <footer class="flex gap-3 w-full max-w-md">
-    <input type="text" id="input-word" placeholder="Prova una parola..." class="input-rounded">
-    <button id="btn-send" class="btn-main">
-        <div class="loader" id="spin-loader"></div>
-        <span id="icon-send">➔</span>
-    </button>
+    <div class="w-full flex gap-3">
+        <input type="text" id="input-word" placeholder="Prova una parola..." class="input-rounded">
+        <button id="btn-send" class="btn-main">
+            <div class="loader" id="spin-loader"></div>
+            <span id="icon-send">➔</span>
+        </button>
+    </div>
 </footer>
 
 <!-- Bottone e pannello statistiche -->
@@ -123,7 +125,18 @@ footer { position: fixed; bottom:0; left:0; right:0; padding:16px; background:wh
         <p><strong>Miglior partita:</strong> <span id="stat-best-attempts">–</span> tentativi</p>
     </div>
 </div>
-<!-- Pannello Musica -->
+
+<script>
+/* --- Animazione titolo --- */
+const t = "Contesto AI"; 
+const tc = document.getElementById('wave-title');
+t.split("").forEach((c,i)=>{
+    const s=document.createElement("span"); 
+    s.innerText=c; 
+    s.style.animationDelay=`${i*0.08}s`; 
+    tc.appendChild(s);
+
+/* --- Player Musicale ---*/
 <div id="music-overlay" onclick="closeMusicPanel()"></div>
 <div id="music-btn">🎵</div>
 <div id="music-panel" class="fixed bottom-[-110%] left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white rounded-2xl shadow-lg p-6 transition-all z-50">
@@ -138,13 +151,7 @@ footer { position: fixed; bottom:0; left:0; right:0; padding:16px; background:wh
     <div class="aspect-video w-full bg-black rounded-xl overflow-hidden">
         <div id="player"></div>
     </div>
-</div>
-<script>
-/* --- Animazione titolo --- 
-aggiungo come io abbia rubato tutto da un mio altro 
-progetto che copiava a sua volta lo stile di google */
-const t = "Contesto AI"; const tc = document.getElementById('wave-title');
-t.split("").forEach((c,i)=>{const s=document.createElement("span"); s.innerText=c; s.style.animationDelay=`${i*0.08}s`; tc.appendChild(s);});
+});
 
 /* --- Variabili di gioco --- */
 let paroleSegrete = [];
@@ -153,6 +160,7 @@ let partitaInCorso = false;
 let storicoTentativi = [];
 let livelloIndizio = 0;
 let ultimoIndizio = 0;
+
 /* --- Player Musicale ---*/
 var player;
 function onYouTubeIframeAPIReady(){player=new YT.Player('player',{height:'100%',width:'100%',videoId:'n61ULEU7CO0',playerVars:{'autoplay':0,'controls':1,'modestbranding':1,'rel':0}});}
@@ -164,6 +172,7 @@ function loadVideo(){let input=document.getElementById('yt-url').value; const re
 
 document.getElementById('music-btn').onclick = openMusicPanel;
 
+    
 /* --- Statistiche in locale --- */
 const LOCAL_STATS_KEY = "contestoAI_stats";
 let stats = { totalWins:0, bestAttempts:null };
@@ -186,13 +195,11 @@ const ui = {
     aiLabel: document.getElementById("ai-label"),
 };
 
-
-/* --- Caricamento parole da file esterno --- 
-l'unica cosa che ho effettivamente 
-diviso dal resto perché stranamente non ha rotto nulla XD<*/
+/* --- Caricamento parole da file esterno --- */
 fetch('words.json')
 .then(r=>r.json())
-.then(data=>{paroleSegrete=data; avviaNuovaPartita();});
+.then(data=>{paroleSegrete=data; avviaNuovaPartita();})
+.catch(()=>{console.warn("Fallback parole"); paroleSegrete=["viaggio","montagna","computer"]; avviaNuovaPartita();});
 
 /* --- Funzioni principali --- */
 function avviaNuovaPartita(){
@@ -204,39 +211,43 @@ function avviaNuovaPartita(){
     updateStatsUI();
 }
 
-async function aiChat(prompt){await puter.ready; const res=await puter.ai.chat({prompt,model:"gemini-pro"}); return res.message.content;}
+async function aiChat(prompt){
+    try{await puter.ready; const res=await puter.ai.chat({prompt,model:"gemini-pro"}); return res.message.content;}
+    catch{return "AI non disponibile";}
+}
+
 async function calcolaDistanzaAI(parolaUtente){
     if(parolaUtente===parolaDaIndovinare) return 1;
-    try{const testo=await aiChat(`Calcola la distanza semantica tra "${parolaUtente}" e "${parolaDaIndovinare}". Rispondi solo con un numero tra 2 e 15000.`); return parseInt(testo.replace(/\D/g,"")) || 3000;}
-    catch{return Math.abs(parolaUtente.length-parolaDaIndovinare.length)*500+2000;}
+    try{
+        const testo = await aiChat(`Calcola la distanza semantica tra "${parolaUtente}" e "${parolaDaIndovinare}". Rispondi solo con un numero tra 2 e 15000.`);
+        return parseInt(testo.replace(/\D/g,"")) || 3000;
+    } catch {
+        return Math.abs(parolaUtente.length-parolaDaIndovinare.length)*500+2000;
+    }
 }
 
-function feedbackTestuale(d){if(d===1) return "🏆 Vittoria"; if(d<800) return "🔥 Bollente"; if(d<3000) return "🙂 Vicino"; if(d<7000) return "😐 Lontano"; return "🧊 Ghiacciato";}
+function feedbackTestuale(d){if(d===1)return"🏆 Vittoria";if(d<800)return"🔥 Bollente";if(d<3000)return"🙂 Vicino";if(d<7000)return"😐 Lontano";return"🧊 Ghiacciato";}
 
 async function gestisciInvio(){
-    const parola = ui.input.value.trim().toLowerCase();
-    if(!parola||!partitaInCorso) return;
-
+    const parola=ui.input.value.trim().toLowerCase(); if(!parola||!partitaInCorso) return;
     ui.loader.style.display="block"; ui.icon.style.display="none";
-    const distanza = await calcolaDistanzaAI(parola);
+    const distanza=await calcolaDistanzaAI(parola);
     ui.loader.style.display="none"; ui.icon.style.display="block"; ui.input.value="";
     ui.empty.style.display="none";
-
-    storicoTentativi.push({ parola,distanza }); aggiungiRiga(parola,distanza);
+    storicoTentativi.push({parola,distanza}); aggiungiRiga(parola,distanza);
     ui.aiBox.classList.add("visible"); ui.aiText.innerText=feedbackTestuale(distanza);
     updateStatsUI();
-
     if(distanza===1){finePartita();}
 }
-/* Aggiunge una riga ogni volta, così da evitare che tutto si raggruppi in una sottospecie di orgia*/
+
 function aggiungiRiga(parola,distanza){
-    const percentuale = Math.max(5, 100-(distanza/15000*100));
-    let colore = distanza===1?"#22c55e":distanza<1000?"#4ade80":"#facc15";
-    const div = document.createElement("div");
-    div.className="guess-row shadow-sm";
+    const percentuale=Math.max(5,100-(distanza/15000*100));
+    let colore=distanza===1?"#22c55e":distanza<1000?"#4ade80":"#facc15";
+    const div=document.createElement("div"); div.className="guess-row shadow-sm";
     div.innerHTML=`<div class="progress-bg" style="width:${percentuale}%;background:${colore};opacity:.3"></div>
     <div class="content-z font-bold"><span>${parola}</span><span>${feedbackTestuale(distanza)}</span></div>`;
     ui.list.appendChild(div);
+    ui.list.scrollTop = ui.list.scrollHeight; // scroll automatico
 }
 
 function finePartita(){partitaInCorso=false; ui.aiText.innerText="Grande! Hai trovato la parola: "+parolaDaIndovinare; ui.aiBox.classList.add("visible"); recordWin();}
