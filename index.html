@@ -123,7 +123,22 @@ footer { position: fixed; bottom:0; left:0; right:0; padding:16px; background:wh
         <p><strong>Miglior partita:</strong> <span id="stat-best-attempts">–</span> tentativi</p>
     </div>
 </div>
-
+<!-- Pannello Musica -->
+<div id="music-overlay" onclick="closeMusicPanel()"></div>
+<div id="music-btn">🎵</div>
+<div id="music-panel" class="fixed bottom-[-110%] left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white rounded-2xl shadow-lg p-6 transition-all z-50">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-lg">Music Player</h3>
+        <button onclick="closeMusicPanel()" class="text-gray-500 font-bold text-xl">✕</button>
+    </div>
+    <div class="flex gap-2 mb-4">
+        <input type="text" id="yt-url" placeholder="Incolla link YouTube..." class="input-rounded flex-1">
+        <button onclick="loadVideo()" class="btn-main">CARICA</button>
+    </div>
+    <div class="aspect-video w-full bg-black rounded-xl overflow-hidden">
+        <div id="player"></div>
+    </div>
+</div>
 <script>
 /* --- Animazione titolo --- 
 aggiungo come io abbia rubato tutto da un mio altro 
@@ -138,6 +153,16 @@ let partitaInCorso = false;
 let storicoTentativi = [];
 let livelloIndizio = 0;
 let ultimoIndizio = 0;
+/* --- Player Musicale ---*/
+var player;
+function onYouTubeIframeAPIReady(){player=new YT.Player('player',{height:'100%',width:'100%',videoId:'n61ULEU7CO0',playerVars:{'autoplay':0,'controls':1,'modestbranding':1,'rel':0}});}
+var tag=document.createElement('script'); tag.src="https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
+
+function openMusicPanel(){document.getElementById('music-panel').style.bottom="0"; document.getElementById('music-overlay').classList.add('visible');}
+function closeMusicPanel(){document.getElementById('music-panel').style.bottom="-110%"; document.getElementById('music-overlay').classList.remove('visible');}
+function loadVideo(){let input=document.getElementById('yt-url').value; const regExp=/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/; const match=input.match(regExp); if(match&&match[2].length==11)player.loadVideoById(match[2]);}
+
+document.getElementById('music-btn').onclick = openMusicPanel;
 
 /* --- Statistiche in locale --- */
 const LOCAL_STATS_KEY = "contestoAI_stats";
@@ -160,6 +185,7 @@ const ui = {
     aiText: document.getElementById("ai-text"),
     aiLabel: document.getElementById("ai-label"),
 };
+
 
 /* --- Caricamento parole da file esterno --- 
 l'unica cosa che ho effettivamente 
