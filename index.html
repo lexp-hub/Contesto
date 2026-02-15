@@ -10,7 +10,10 @@
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-
+/* Prima che qualcuno mi flagelli ho voluto tenere tutto in un file perché non funzionava nulla se dividevo in più parti, 
+non sono riuscito a capire bene il motivo ma per ora va bene così, 
+se in futuro riesco a sistemare tutto allora magari lo dividerò in più file, 
+ma per ora è un unico blocco di codice, spero che non dia troppo fastidio :D */
 /* Stile generale */
 :root {
     --primaryColor: #0061a4;
@@ -30,7 +33,9 @@ body {
     min-height: 100vh;
 }
 
-/* Animazione titolo "snake wave" */
+/* Animazione titolo "snake wave" 
+aggiungo come io abbia rubato tutto da un mio altro 
+progetto che copiava a sua volta lo stile di google*/
 @keyframes snakeWave {
     0%,100%{transform: translateY(0);}
     50%{transform: translateY(-12px);}
@@ -228,9 +233,9 @@ function updateStatsUI(){
 }
 function toggleStatsPanel(){
     const p=document.getElementById("stats-panel");
-    p.style.transform = (p.style.transform==="translateY(0%)")?"translateY(100%)":"translateY(0%)";
+    const isOpen = p.style.transform === "translateY(0%)";
+    p.style.transform = isOpen ? "translateY(100%)" : "translateY(0%)";
 }
-function recordWin(){stats.totalWins++; if(stats.bestAttempts===null || storicoTentativi.length<stats.bestAttempts) stats.bestAttempts=storicoTentativi.length; saveStats(); updateStatsUI();}
 
 /* --- Player musicale YouTube --- */
 var player;
@@ -254,10 +259,14 @@ const ui = {
     aiBox: document.getElementById("ai-box"),
     aiText: document.getElementById("ai-text"),
     aiLabel: document.getElementById("ai-label"),
-    hintBtn: document.getElementById("btn-hint")
+    hintBtn: document.getElementById("btn-hint"),
+    statsBtn: document.getElementById("stats-btn")
 };
 
 /* --- Caricamento parole --- */
+/* --- Caricamento parole da file esterno --- 
+l'unica cosa che ho effettivamente 
+diviso dal resto perché stranamente non ha rotto nulla XD*/
 async function caricaParole(){
     try{ const res = await fetch("parole.json"); paroleSegrete = await res.json(); }
     catch{ paroleSegrete = ["viaggio","montagna","computer","amicizia","espresso","oceano","stella","giardino","isola","foresta","pizza","libro"]; }
@@ -360,6 +369,7 @@ ui.hintBtn.onclick = async function(){
 /* --- Eventi --- */
 ui.sendBtn.onclick = gestisciInvio;
 ui.input.addEventListener("keydown", e=>e.key==="Enter"&&gestisciInvio());
+ui.statsBtn.onclick = toggleStatsPanel;
 
 /* --- Avvio --- */
 caricaParole().then(avviaNuovaPartita);
