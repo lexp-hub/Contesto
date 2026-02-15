@@ -11,14 +11,6 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-/* 
-Prima che qualcuno mi flagelli ho voluto tenere tutto in un file 
-perché non funzionava nulla se dividevo in più parti, 
-non sono riuscito a capire bene il motivo ma per ora va bene così, 
-se in futuro riesco a sistemare tutto allora magari lo dividerò in più file, 
-ma per ora è un unico blocco di codice, spero che non dia troppo fastidio :D
-*/
-
 /* Stile generale */
 :root {
     --primaryColor: #0061a4;
@@ -41,9 +33,12 @@ body {
     0%,100%{transform: translateY(0);}
     50%{transform: translateY(-12px);}
 }
-.wave-text span { display:inline-block; animation:snakeWave 1.2s infinite ease-in-out; }
+.wave-text span { 
+    display:inline-block; 
+    animation:snakeWave 1.2s infinite ease-in-out; 
+}
 
-/* Guess row */
+/* Lista tentativi */
 .guess-row { 
     border-radius: 16px; 
     margin-bottom: 8px; 
@@ -56,53 +51,106 @@ body {
     background-color: white; 
     border: 1px solid rgba(0,0,0,0.05); 
 }
-.progress-bg { position: absolute; left:0; top:0; bottom:0; z-index:0; transition: width 1s ease; }
-.content-z { position:relative; z-index:1; display:flex; justify-content:space-between; width:100%; }
+.progress-bg { 
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    bottom: 0; 
+    z-index: 0; 
+    transition: width 1s ease; 
+}
+.content-z { 
+    position: relative; 
+    z-index: 1; 
+    display: flex; 
+    justify-content: space-between; 
+    width: 100%; 
+}
 
 /* Input e pulsante */
-.input-rounded { border-radius:100px; border:2px solid var(--outlineColor); padding:16px 24px; outline:none; width:100%; }
-.btn-main { border-radius:20px; padding:16px; background-color:var(--primaryColor); color:white; min-width:56px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.input-rounded { 
+    border-radius: 100px; 
+    border: 2px solid var(--outlineColor); 
+    padding: 16px 24px; 
+    outline: none; 
+    width: 100%; 
+}
+.btn-main { 
+    border-radius: 20px; 
+    padding: 16px; 
+    background-color: var(--primaryColor); 
+    color: white; 
+    min-width: 56px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+}
 
 /* AI Panel */
-.ai-panel { background-color:#e1e2ec; border-radius:24px; padding:20px; margin-top:20px; display:none; }
-.ai-panel.visible { display:block; }
-.loader { border:3px solid rgba(255,255,255,0.3); border-top:3px solid white; border-radius:50%; width:24px; height:24px; animation: spin 0.8s linear infinite; display:none; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.ai-panel { 
+    background-color: #e1e2ec; 
+    border-radius: 24px; 
+    padding: 20px; 
+    margin-top: 20px; 
+    display: none; 
+}
+.ai-panel.visible { display: block; }
 
-/* Layout responsive */
-header, main { width:100%; max-width:600px; }
-footer { position: fixed; bottom:0; left:0; right:0; padding:16px; background:white/90; backdrop-blur:8px; border-top:1px solid rgba(0,0,0,0.05); display:flex; justify-content:center; z-index:50; }
+/* Loader */
+.loader { 
+    border: 3px solid rgba(255,255,255,0.3); 
+    border-top: 3px solid white; 
+    border-radius: 50%; 
+    width: 24px; 
+    height: 24px; 
+    animation: spin 0.8s linear infinite; 
+    display: none; 
+}
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
 
-/* Pannello statistiche creativo */
-#stats-btn { position: fixed; bottom:96px; right:24px; width:48px; height:48px; border-radius:50%; background:var(--primaryColor); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:60; }
-#stats-panel { position: fixed; bottom:0; left:0; right:0; max-width:600px; margin:auto; background:white; border-radius:2rem 2rem 0 0; padding:24px; transform:translateY(100%); transition: transform 0.3s; z-index:55; }
+/* Layout */
+header, main { width: 100%; max-width: 600px; }
+footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; background:white/90; backdrop-blur:8px; border-top:1px solid rgba(0,0,0,0.05); display:flex; justify-content:center; z-index:50; }
+#list-attempts { max-height: 300px; overflow-y: auto; display:flex; flex-direction:column-reverse; gap:4px; }
+
+/* Pulsante indizio */
+#btn-hint { border-radius:999px; padding:8px 16px; background:white; border:1px solid var(--outlineColor); cursor:pointer; font-weight:bold; font-size:0.75rem; }
 </style>
 </head>
 
 <body class="flex flex-col items-center min-h-screen p-4 pb-32">
 
-<header class="text-center mb-8 mt-6">
+<header class="text-center mt-6 mb-6 w-full max-w-md">
     <h1 id="wave-title" class="wave-text text-5xl font-bold text-slate-800 mb-2"></h1>
     <p class="opacity-60 text-sm">Alimentato da Puter.js con Gemini</p>
+    <div class="flex justify-center mt-4">
+        <button id="btn-hint">💡 INDIZIO</button>
+    </div>
 </header>
 
 <main class="w-full max-w-md flex flex-col items-center">
     <div id="ai-box" class="ai-panel mb-6 border">
         <div class="flex items-center gap-2 mb-2">
             <span>✨</span>
-            <span id="ai-label" class="text-xs font-bold uppercase tracking-wider text-slate-500">Assistente AI</span>
+            <span id="ai-label" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Assistente AI
+            </span>
         </div>
         <p id="ai-text" class="text-sm italic text-slate-700"></p>
     </div>
 
-    <div id="list-attempts" class="flex flex-col-reverse w-full"></div>
+    <div id="list-attempts"></div>
 
-    <div id="empty-msg" class="py-24 text-center opacity-30">
+    <div id="empty-msg" class="py-24 text-center opacity-30 w-full">
         <p class="text-xl">Digita una parola</p>
     </div>
 </main>
 
-<footer class="flex gap-3 w-full max-w-md">
+<footer class="flex justify-center w-full max-w-md">
     <div class="w-full flex gap-3">
         <input type="text" id="input-word" placeholder="Prova una parola..." class="input-rounded">
         <button id="btn-send" class="btn-main">
@@ -112,48 +160,18 @@ footer { position: fixed; bottom:0; left:0; right:0; padding:16px; background:wh
     </div>
 </footer>
 
-<!-- Bottone e pannello statistiche -->
-<div id="stats-btn">📊</div>
-<div id="stats-panel">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold text-slate-800">Statistiche Personali</h2>
-        <button onclick="toggleStatsPanel()" class="text-slate-400 font-bold text-xl">✕</button>
-    </div>
-    <div class="flex flex-col gap-2 text-slate-700">
-        <p><strong>Partita corrente:</strong> <span id="stat-current-attempts">0</span> tentativi</p>
-        <p><strong>Vittorie totali:</strong> <span id="stat-total-wins">0</span></p>
-        <p><strong>Miglior partita:</strong> <span id="stat-best-attempts">–</span> tentativi</p>
-    </div>
-</div>
-
 <script>
-/* --- Animazione titolo --- */
-const t = "Contesto AI"; 
-const tc = document.getElementById('wave-title');
-t.split("").forEach((c,i)=>{
-    const s=document.createElement("span"); 
-    s.innerText=c; 
-    s.style.animationDelay=`${i*0.08}s`; 
-    tc.appendChild(s);
-
-/* --- Player Musicale ---*/
-<div id="music-overlay" onclick="closeMusicPanel()"></div>
-<div id="music-btn">🎵</div>
-<div id="music-panel" class="fixed bottom-[-110%] left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white rounded-2xl shadow-lg p-6 transition-all z-50">
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="font-bold text-lg">Music Player</h3>
-        <button onclick="closeMusicPanel()" class="text-gray-500 font-bold text-xl">✕</button>
-    </div>
-    <div class="flex gap-2 mb-4">
-        <input type="text" id="yt-url" placeholder="Incolla link YouTube..." class="input-rounded flex-1">
-        <button onclick="loadVideo()" class="btn-main">CARICA</button>
-    </div>
-    <div class="aspect-video w-full bg-black rounded-xl overflow-hidden">
-        <div id="player"></div>
-    </div>
+/* --- Animazione titolo snake wave --- */
+const titolo = "Contesto AI";
+const waveTitle = document.getElementById("wave-title");
+titolo.split("").forEach((c,i)=>{
+    const s = document.createElement("span");
+    s.innerText = c;
+    s.style.animationDelay = `${i*0.08}s`;
+    waveTitle.appendChild(s);
 });
 
-/* --- Variabili di gioco --- */
+/* --- Variabili gioco --- */
 let paroleSegrete = [];
 let parolaDaIndovinare = "";
 let partitaInCorso = false;
@@ -161,28 +179,6 @@ let storicoTentativi = [];
 let livelloIndizio = 0;
 let ultimoIndizio = 0;
 
-/* --- Player Musicale ---*/
-var player;
-function onYouTubeIframeAPIReady(){player=new YT.Player('player',{height:'100%',width:'100%',videoId:'n61ULEU7CO0',playerVars:{'autoplay':0,'controls':1,'modestbranding':1,'rel':0}});}
-var tag=document.createElement('script'); tag.src="https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
-
-function openMusicPanel(){document.getElementById('music-panel').style.bottom="0"; document.getElementById('music-overlay').classList.add('visible');}
-function closeMusicPanel(){document.getElementById('music-panel').style.bottom="-110%"; document.getElementById('music-overlay').classList.remove('visible');}
-function loadVideo(){let input=document.getElementById('yt-url').value; const regExp=/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/; const match=input.match(regExp); if(match&&match[2].length==11)player.loadVideoById(match[2]);}
-
-document.getElementById('music-btn').onclick = openMusicPanel;
-
-    
-/* --- Statistiche in locale --- */
-const LOCAL_STATS_KEY = "contestoAI_stats";
-let stats = { totalWins:0, bestAttempts:null };
-function loadStats(){const s=localStorage.getItem(LOCAL_STATS_KEY); if(s) stats=JSON.parse(s); updateStatsUI();}
-function saveStats(){localStorage.setItem(LOCAL_STATS_KEY, JSON.stringify(stats));}
-function updateStatsUI(){document.getElementById("stat-total-wins").innerText=stats.totalWins; document.getElementById("stat-best-attempts").innerText=stats.bestAttempts!==null?stats.bestAttempts:"–"; document.getElementById("stat-current-attempts").innerText=storicoTentativi.length;}
-function toggleStatsPanel(){const p=document.getElementById("stats-panel"); p.style.transform = (p.style.transform==="translateY(0%)")?"translateY(100%)":"translateY(0%)";}
-function recordWin(){stats.totalWins++; if(stats.bestAttempts===null || storicoTentativi.length<stats.bestAttempts) stats.bestAttempts=storicoTentativi.length; saveStats(); updateStatsUI();}
-
-/* --- Elementi UI --- */
 const ui = {
     input: document.getElementById("input-word"),
     sendBtn: document.getElementById("btn-send"),
@@ -193,70 +189,134 @@ const ui = {
     aiBox: document.getElementById("ai-box"),
     aiText: document.getElementById("ai-text"),
     aiLabel: document.getElementById("ai-label"),
+    hintBtn: document.getElementById("btn-hint")
 };
 
-/* --- Caricamento parole da file esterno --- */
-fetch('words.json')
-.then(r=>r.json())
-.then(data=>{paroleSegrete=data; avviaNuovaPartita();})
-.catch(()=>{console.warn("Fallback parole"); paroleSegrete=["viaggio","montagna","computer"]; avviaNuovaPartita();});
-
-/* --- Funzioni principali --- */
-function avviaNuovaPartita(){
-    const index = Math.floor(Math.random()*paroleSegrete.length);
-    parolaDaIndovinare = paroleSegrete[index];
-    partitaInCorso = true; storicoTentativi=[]; livelloIndizio=0;
-    ui.list.innerHTML=""; ui.aiBox.classList.remove("visible"); ui.empty.style.display="flex"; ui.input.value="";
-    console.log("Nuova parola:", parolaDaIndovinare);
-    updateStatsUI();
-}
-
-async function aiChat(prompt){
-    try{await puter.ready; const res=await puter.ai.chat({prompt,model:"gemini-pro"}); return res.message.content;}
-    catch{return "AI non disponibile";}
-}
-
-async function calcolaDistanzaAI(parolaUtente){
-    if(parolaUtente===parolaDaIndovinare) return 1;
+/* --- Caricamento parole --- */
+async function caricaParole(){
     try{
-        const testo = await aiChat(`Calcola la distanza semantica tra "${parolaUtente}" e "${parolaDaIndovinare}". Rispondi solo con un numero tra 2 e 15000.`);
-        return parseInt(testo.replace(/\D/g,"")) || 3000;
+        const res = await fetch("parole.json");
+        paroleSegrete = await res.json();
     } catch {
-        return Math.abs(parolaUtente.length-parolaDaIndovinare.length)*500+2000;
+        paroleSegrete = ["viaggio","montagna","computer","amicizia","espresso","oceano","stella","giardino","isola","foresta","pizza","libro"];
     }
 }
 
-function feedbackTestuale(d){if(d===1)return"🏆 Vittoria";if(d<800)return"🔥 Bollente";if(d<3000)return"🙂 Vicino";if(d<7000)return"😐 Lontano";return"🧊 Ghiacciato";}
+/* --- Nuova partita --- */
+function avviaNuovaPartita(){
+    if(!paroleSegrete.length) return;
+    parolaDaIndovinare = paroleSegrete[Math.floor(Math.random()*paroleSegrete.length)];
+    partitaInCorso = true;
+    storicoTentativi = [];
+    livelloIndizio = 0;
+    ui.list.innerHTML = "";
+    ui.aiBox.classList.remove("visible");
+    ui.empty.style.display = "flex";
+    ui.input.value = "";
+    console.log("Nuova parola scelta:", parolaDaIndovinare);
+}
 
+/* --- AI Chat --- */
+async function aiChat(prompt){
+    await puter.ready;
+    const res = await puter.ai.chat({prompt,model:"gemini-pro"});
+    return res.message.content;
+}
+
+/* --- Distanza AI --- */
+async function calcolaDistanzaAI(parolaUtente){
+    if(parolaUtente === parolaDaIndovinare) return 1;
+    try{
+        const testo = await aiChat(`Calcola la distanza semantica tra "${parolaUtente}" e "${parolaDaIndovinare}". Rispondi solo con un numero tra 2 e 15000.`);
+        const num = parseInt(testo.replace(/\D/g,""));
+        if(isNaN(num)) throw "NaN";
+        ui.aiLabel.innerText = "Assistente AI (Cloud)";
+        return num;
+    } catch {
+        ui.aiLabel.innerText = "Assistente (Offline)";
+        return Math.abs(parolaUtente.length - parolaDaIndovinare.length)*500 + 2000;
+    }
+}
+
+/* --- Feedback --- */
+function feedbackTestuale(d){
+    if(d===1) return "🏆 Vittoria";
+    if(d<800) return "🔥 Bollente";
+    if(d<3000) return "🙂 Vicino";
+    if(d<7000) return "😐 Lontano";
+    return "🧊 Ghiacciato";
+}
+
+/* --- Gestione invio --- */
 async function gestisciInvio(){
-    const parola=ui.input.value.trim().toLowerCase(); if(!parola||!partitaInCorso) return;
-    ui.loader.style.display="block"; ui.icon.style.display="none";
-    const distanza=await calcolaDistanzaAI(parola);
-    ui.loader.style.display="none"; ui.icon.style.display="block"; ui.input.value="";
-    ui.empty.style.display="none";
-    storicoTentativi.push({parola,distanza}); aggiungiRiga(parola,distanza);
-    ui.aiBox.classList.add("visible"); ui.aiText.innerText=feedbackTestuale(distanza);
-    updateStatsUI();
-    if(distanza===1){finePartita();}
+    const parola = ui.input.value.trim().toLowerCase();
+    if(!parola || !partitaInCorso) return;
+
+    ui.loader.style.display = "block";
+    ui.icon.style.display = "none";
+
+    const distanza = await calcolaDistanzaAI(parola);
+
+    ui.loader.style.display = "none";
+    ui.icon.style.display = "block";
+    ui.input.value = "";
+    ui.empty.style.display = "none";
+
+    storicoTentativi.push({parola,distanza});
+    aggiungiRiga(parola,distanza);
+
+    ui.aiBox.classList.add("visible");
+    ui.aiText.innerText = feedbackTestuale(distanza);
+
+    if(distanza === 1) finePartita();
 }
 
+/* --- Aggiungi riga tentativo --- */
 function aggiungiRiga(parola,distanza){
-    const percentuale=Math.max(5,100-(distanza/15000*100));
-    let colore=distanza===1?"#22c55e":distanza<1000?"#4ade80":"#facc15";
-    const div=document.createElement("div"); div.className="guess-row shadow-sm";
-    div.innerHTML=`<div class="progress-bg" style="width:${percentuale}%;background:${colore};opacity:.3"></div>
-    <div class="content-z font-bold"><span>${parola}</span><span>${feedbackTestuale(distanza)}</span></div>`;
+    const percentuale = Math.max(5, 100-(distanza/15000*100));
+    let colore = distanza===1?"#22c55e":distanza<1000?"#4ade80":"#facc15";
+    const div = document.createElement("div");
+    div.className = "guess-row shadow-sm";
+    div.innerHTML = `<div class="progress-bg" style="width:${percentuale}%;background:${colore};opacity:.3"></div>
+                     <div class="content-z font-bold"><span>${parola}</span><span>${feedbackTestuale(distanza)}</span></div>`;
     ui.list.appendChild(div);
-    ui.list.scrollTop = ui.list.scrollHeight; // scroll automatico
 }
 
-function finePartita(){partitaInCorso=false; ui.aiText.innerText="Grande! Hai trovato la parola: "+parolaDaIndovinare; ui.aiBox.classList.add("visible"); recordWin();}
+/* --- Fine partita --- */
+function finePartita(){
+    partitaInCorso = false;
+    ui.aiText.innerText = "Grande! Hai trovato la parola: "+parolaDaIndovinare;
+    ui.aiBox.classList.add("visible");
+}
+
+/* --- Indizi progressivi --- */
+ui.hintBtn.onclick = async function(){
+    const now = Date.now();
+    if(now - ultimoIndizio < 10000){
+        ui.aiText.innerText = "Aspetta qualche secondo prima del prossimo indizio ⏳";
+        ui.aiBox.classList.add("visible");
+        return;
+    }
+    ultimoIndizio = now;
+    livelloIndizio++;
+    ui.aiBox.classList.add("visible");
+    if(livelloIndizio===1) ui.aiText.innerText = "La parola ha "+parolaDaIndovinare.length+" lettere.";
+    else if(livelloIndizio===2) ui.aiText.innerText = "Inizia con la lettera: "+parolaDaIndovinare[0].toUpperCase();
+    else {
+        try{
+            ui.aiText.innerText = await aiChat(`Dai un indizio concettuale sulla parola "${parolaDaIndovinare}" senza dirla.`);
+        } catch {
+            ui.aiText.innerText = "Indizio AI non disponibile.";
+        }
+    }
+};
 
 /* --- Eventi --- */
 ui.sendBtn.onclick = gestisciInvio;
-ui.input.addEventListener("keydown", e=>e.key==="Enter"&&gestisciInvio());
+ui.input.addEventListener("keydown",e=>e.key==="Enter"&&gestisciInvio());
 
-loadStats();
+/* --- Avvio --- */
+caricaParole().then(avviaNuovaPartita);
 </script>
 </body>
 </html>
