@@ -26,6 +26,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; 
+    min-height: 100vh;
 }
 
 /* Animazione titolo "snake wave" */
@@ -113,19 +115,25 @@ body {
 }
 
 /* Layout */
-header, main { width: 100%; max-width: 600px; }
-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; background:white/90; backdrop-blur:8px; border-top:1px solid rgba(0,0,0,0.05); display:flex; justify-content:center; z-index:50; }
+header, main { width: 100%; max-width: 600px; text-align:center; }
 #list-attempts { max-height: 300px; overflow-y: auto; display:flex; flex-direction:column-reverse; gap:4px; }
 
 /* Pulsante indizio */
 #btn-hint { border-radius:999px; padding:8px 16px; background:white; border:1px solid var(--outlineColor); cursor:pointer; font-weight:bold; font-size:0.75rem; }
+
+/* Input box centrato */
+#input-container { width: 100%; max-width: 600px; display:flex; gap:12px; margin-top:32px; }
+
+/* Pannello statistiche */
+#stats-btn { position: fixed; bottom:24px; right:24px; width:48px; height:48px; border-radius:50%; background:var(--primaryColor); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:60; }
+#stats-panel { position: fixed; bottom:0; left:0; right:0; max-width:600px; margin:auto; background:white; border-radius:2rem 2rem 0 0; padding:24px; transform:translateY(100%); transition: transform 0.3s; z-index:55; }
 </style>
 </head>
 
-<body class="flex flex-col items-center min-h-screen p-4 pb-32">
+<body>
 
-<header class="text-center mt-6 mb-6 w-full max-w-md">
-    <h1 id="wave-title" class="wave-text text-5xl font-bold text-slate-800 mb-2"></h1>
+<header class="mt-6 mb-6 w-full max-w-md">
+    <h1 id="wave-title" class="wave-text text-6xl font-bold text-slate-800 mb-2"></h1>
     <p class="opacity-60 text-sm">Alimentato da Puter.js con Gemini</p>
     <div class="flex justify-center mt-4">
         <button id="btn-hint">💡 INDIZIO</button>
@@ -148,17 +156,46 @@ footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; backgroun
     <div id="empty-msg" class="py-24 text-center opacity-30 w-full">
         <p class="text-xl">Digita una parola</p>
     </div>
-</main>
 
-<footer class="flex justify-center w-full max-w-md">
-    <div class="w-full flex gap-3">
+    <!-- Barra input centrata -->
+    <div id="input-container">
         <input type="text" id="input-word" placeholder="Prova una parola..." class="input-rounded">
         <button id="btn-send" class="btn-main">
             <div class="loader" id="spin-loader"></div>
             <span id="icon-send">➔</span>
         </button>
     </div>
-</footer>
+</main>
+
+<!-- Bottone e pannello statistiche -->
+<div id="stats-btn">📊</div>
+<div id="stats-panel">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-slate-800">Statistiche Personali</h2>
+        <button onclick="toggleStatsPanel()" class="text-slate-400 font-bold text-xl">✕</button>
+    </div>
+    <div class="flex flex-col gap-2 text-slate-700">
+        <p><strong>Partita corrente:</strong> <span id="stat-current-attempts">0</span> tentativi</p>
+        <p><strong>Vittorie totali:</strong> <span id="stat-total-wins">0</span></p>
+        <p><strong>Miglior partita:</strong> <span id="stat-best-attempts">–</span> tentativi</p>
+    </div>
+</div>
+
+<!-- Player YouTube -->
+<div id="music-btn" style="position:fixed; bottom:24px; left:24px; width:48px; height:48px; border-radius:50%; background:#0061a4; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:60;">🎵</div>
+<div id="music-panel" style="position:fixed; bottom:-110%; left:50%; transform:-translate-x-1/2; width:100%; max-width:600px; background:white; border-radius:2rem 2rem 0 0; padding:24px; transition:0.3s; z-index:50;">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-lg">Music Player</h3>
+        <button onclick="closeMusicPanel()" class="text-gray-500 font-bold text-xl">✕</button>
+    </div>
+    <div class="flex gap-2 mb-4">
+        <input type="text" id="yt-url" placeholder="Incolla link YouTube..." class="input-rounded flex-1">
+        <button onclick="loadVideo()" class="btn-main">CARICA</button>
+    </div>
+    <div class="aspect-video w-full bg-black rounded-xl overflow-hidden">
+        <div id="player"></div>
+    </div>
+</div>
 
 <script>
 /* --- Animazione titolo snake wave --- */
@@ -179,6 +216,34 @@ let storicoTentativi = [];
 let livelloIndizio = 0;
 let ultimoIndizio = 0;
 
+/* --- Statistiche locali --- */
+const LOCAL_STATS_KEY = "contestoAI_stats";
+let stats = { totalWins:0, bestAttempts:null };
+function loadStats(){const s=localStorage.getItem(LOCAL_STATS_KEY); if(s) stats=JSON.parse(s); updateStatsUI();}
+function saveStats(){localStorage.setItem(LOCAL_STATS_KEY, JSON.stringify(stats));}
+function updateStatsUI(){
+    document.getElementById("stat-total-wins").innerText=stats.totalWins;
+    document.getElementById("stat-best-attempts").innerText=stats.bestAttempts!==null?stats.bestAttempts:"–";
+    document.getElementById("stat-current-attempts").innerText=storicoTentativi.length;
+}
+function toggleStatsPanel(){
+    const p=document.getElementById("stats-panel");
+    p.style.transform = (p.style.transform==="translateY(0%)")?"translateY(100%)":"translateY(0%)";
+}
+function recordWin(){stats.totalWins++; if(stats.bestAttempts===null || storicoTentativi.length<stats.bestAttempts) stats.bestAttempts=storicoTentativi.length; saveStats(); updateStatsUI();}
+
+/* --- Player musicale YouTube --- */
+var player;
+function onYouTubeIframeAPIReady(){
+    player=new YT.Player('player',{height:'100%',width:'100%',videoId:'n61ULEU7CO0',playerVars:{'autoplay':0,'controls':1,'modestbranding':1,'rel':0}});
+}
+var tag=document.createElement('script'); tag.src="https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
+function openMusicPanel(){document.getElementById('music-panel').style.bottom="0";}
+function closeMusicPanel(){document.getElementById('music-panel').style.bottom="-110%";}
+function loadVideo(){let input=document.getElementById('yt-url').value; const regExp=/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/; const match=input.match(regExp); if(match&&match[2].length==11)player.loadVideoById(match[2]);}
+document.getElementById('music-btn').onclick = openMusicPanel;
+
+/* --- UI --- */
 const ui = {
     input: document.getElementById("input-word"),
     sendBtn: document.getElementById("btn-send"),
@@ -194,12 +259,8 @@ const ui = {
 
 /* --- Caricamento parole --- */
 async function caricaParole(){
-    try{
-        const res = await fetch("parole.json");
-        paroleSegrete = await res.json();
-    } catch {
-        paroleSegrete = ["viaggio","montagna","computer","amicizia","espresso","oceano","stella","giardino","isola","foresta","pizza","libro"];
-    }
+    try{ const res = await fetch("parole.json"); paroleSegrete = await res.json(); }
+    catch{ paroleSegrete = ["viaggio","montagna","computer","amicizia","espresso","oceano","stella","giardino","isola","foresta","pizza","libro"]; }
 }
 
 /* --- Nuova partita --- */
@@ -214,14 +275,11 @@ function avviaNuovaPartita(){
     ui.empty.style.display = "flex";
     ui.input.value = "";
     console.log("Nuova parola scelta:", parolaDaIndovinare);
+    updateStatsUI();
 }
 
 /* --- AI Chat --- */
-async function aiChat(prompt){
-    await puter.ready;
-    const res = await puter.ai.chat({prompt,model:"gemini-pro"});
-    return res.message.content;
-}
+async function aiChat(prompt){await puter.ready; const res=await puter.ai.chat({prompt,model:"gemini-pro"}); return res.message.content;}
 
 /* --- Distanza AI --- */
 async function calcolaDistanzaAI(parolaUtente){
@@ -232,7 +290,7 @@ async function calcolaDistanzaAI(parolaUtente){
         if(isNaN(num)) throw "NaN";
         ui.aiLabel.innerText = "Assistente AI (Cloud)";
         return num;
-    } catch {
+    } catch{
         ui.aiLabel.innerText = "Assistente (Offline)";
         return Math.abs(parolaUtente.length - parolaDaIndovinare.length)*500 + 2000;
     }
@@ -251,72 +309,61 @@ function feedbackTestuale(d){
 async function gestisciInvio(){
     const parola = ui.input.value.trim().toLowerCase();
     if(!parola || !partitaInCorso) return;
-
-    ui.loader.style.display = "block";
-    ui.icon.style.display = "none";
-
+    ui.loader.style.display="block"; ui.icon.style.display="none";
     const distanza = await calcolaDistanzaAI(parola);
-
-    ui.loader.style.display = "none";
-    ui.icon.style.display = "block";
-    ui.input.value = "";
-    ui.empty.style.display = "none";
-
+    ui.loader.style.display="none"; ui.icon.style.display="block"; ui.input.value="";
+    ui.empty.style.display="none";
     storicoTentativi.push({parola,distanza});
     aggiungiRiga(parola,distanza);
-
-    ui.aiBox.classList.add("visible");
-    ui.aiText.innerText = feedbackTestuale(distanza);
-
-    if(distanza === 1) finePartita();
+    ui.aiBox.classList.add("visible"); ui.aiText.innerText = feedbackTestuale(distanza);
+    updateStatsUI();
+    if(distanza===1){ finePartita(); }
 }
 
-/* --- Aggiungi riga tentativo --- */
+/* --- Aggiungi riga --- */
 function aggiungiRiga(parola,distanza){
     const percentuale = Math.max(5, 100-(distanza/15000*100));
     let colore = distanza===1?"#22c55e":distanza<1000?"#4ade80":"#facc15";
-    const div = document.createElement("div");
-    div.className = "guess-row shadow-sm";
-    div.innerHTML = `<div class="progress-bg" style="width:${percentuale}%;background:${colore};opacity:.3"></div>
-                     <div class="content-z font-bold"><span>${parola}</span><span>${feedbackTestuale(distanza)}</span></div>`;
+    const div=document.createElement("div");
+    div.className="guess-row shadow-sm";
+    div.innerHTML=`<div class="progress-bg" style="width:${percentuale}%;background:${colore};opacity:.3"></div>
+                   <div class="content-z font-bold"><span>${parola}</span><span>${feedbackTestuale(distanza)}</span></div>`;
     ui.list.appendChild(div);
 }
 
 /* --- Fine partita --- */
 function finePartita(){
-    partitaInCorso = false;
-    ui.aiText.innerText = "Grande! Hai trovato la parola: "+parolaDaIndovinare;
+    partitaInCorso=false;
+    ui.aiText.innerText="Grande! Hai trovato la parola: "+parolaDaIndovinare;
     ui.aiBox.classList.add("visible");
+    recordWin();
 }
 
 /* --- Indizi progressivi --- */
 ui.hintBtn.onclick = async function(){
-    const now = Date.now();
-    if(now - ultimoIndizio < 10000){
-        ui.aiText.innerText = "Aspetta qualche secondo prima del prossimo indizio ⏳";
+    const now=Date.now();
+    if(now-ultimoIndizio<10000){
+        ui.aiText.innerText="Aspetta qualche secondo prima del prossimo indizio ⏳";
         ui.aiBox.classList.add("visible");
         return;
     }
-    ultimoIndizio = now;
-    livelloIndizio++;
+    ultimoIndizio=now; livelloIndizio++;
     ui.aiBox.classList.add("visible");
     if(livelloIndizio===1) ui.aiText.innerText = "La parola ha "+parolaDaIndovinare.length+" lettere.";
     else if(livelloIndizio===2) ui.aiText.innerText = "Inizia con la lettera: "+parolaDaIndovinare[0].toUpperCase();
     else {
-        try{
-            ui.aiText.innerText = await aiChat(`Dai un indizio concettuale sulla parola "${parolaDaIndovinare}" senza dirla.`);
-        } catch {
-            ui.aiText.innerText = "Indizio AI non disponibile.";
-        }
+        try{ ui.aiText.innerText = await aiChat(`Dai un indizio concettuale sulla parola "${parolaDaIndovinare}" senza dirla.`); }
+        catch{ ui.aiText.innerText = "Indizio AI non disponibile."; }
     }
 };
 
 /* --- Eventi --- */
 ui.sendBtn.onclick = gestisciInvio;
-ui.input.addEventListener("keydown",e=>e.key==="Enter"&&gestisciInvio());
+ui.input.addEventListener("keydown", e=>e.key==="Enter"&&gestisciInvio());
 
 /* --- Avvio --- */
 caricaParole().then(avviaNuovaPartita);
+loadStats();
 </script>
 </body>
 </html>
