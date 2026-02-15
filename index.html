@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Contesto AI - Puter.js Edition</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://js.puter.com/v2/"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* Prima che qualcuno mi flagelli ho voluto tenere tutto in un file 
+perché non funzionava nulla se dividevo in più parti, 
+non sono riuscito a capire bene il motivo ma per ora va bene così, 
+se in futuro riesco a sistemare tutto allora magari lo dividerò in più file, 
+ma per ora è un unico blocco di codice, spero che non dia troppo fastidio :D */
+:root {
+    --primaryColor: #0061a4;
+    --surfaceColor: #fdfbff;
+    --outlineColor: #74777f;
+}
+
+body { 
+    font-family: 'Roboto', sans-serif; 
+    background-color: var(--surfaceColor); 
+    margin: 0; 
+    padding: 0; 
+}
+
+.guess-row { 
+    border-radius: 16px; 
+    margin-bottom: 8px; 
+    padding: 12px 16px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    position: relative; 
+    overflow: hidden; 
+    background-color: white; 
+    border: 1px solid rgba(0,0,0,0.05); 
+}
+
+.progress-bg { 
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    bottom: 0; 
+    z-index: 0; 
+    transition: width 1s ease; 
+}
+
+.content-z { 
+    position: relative; 
+    z-index: 1; 
+    display: flex; 
+    justify-content: space-between; 
+    width: 100%; 
+}
+
+.input-rounded { 
+    border-radius: 100px; 
+    border: 2px solid var(--outlineColor); 
+    padding: 16px 24px; 
+    outline: none; 
+    width: 100%; 
+}
+
+.btn-main { 
+    border-radius: 20px; 
+    padding: 16px; 
+    background-color: var(--primaryColor); 
+    color: white; 
+    min-width: 56px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+}
+
+.ai-panel { 
+    background-color: #e1e2ec; 
+    border-radius: 24px; 
+    padding: 20px; 
+    margin-top: 20px; 
+    display: none; 
+}
+
+.ai-panel.visible { display: block; }
+
+.loader { 
+    border: 3px solid rgba(255,255,255,0.3); 
+    border-top: 3px solid white; 
+    border-radius: 50%; 
+    width: 24px; 
+    height: 24px; 
+    animation: spin 0.8s linear infinite; 
+    display: none; 
+}
+
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
+</style>
+</head>
+
+<body class="flex flex-col items-center min-h-screen p-4 pb-32">
+
+<header class="w-full max-w-md mt-6 mb-8 text-center">
+    <h1 class="text-4xl font-bold text-slate-800">Contesto AI</h1>
+    <p class="opacity-60 mt-2 text-sm">Alimentato da Puter.js con Gemini</p>
+    <div class="flex gap-2 mt-4 justify-center">
+        <button id="btn-hint" class="px-4 py-2 bg-white border rounded-full text-xs font-bold">💡 INDIZIO</button>
+    </div>
+</header>
+
+<main class="w-full max-w-md">
+    <div id="ai-box" class="ai-panel mb-6 border">
+        <div class="flex items-center gap-2 mb-2">
+            <span>✨</span>
+            <span id="ai-label" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Assistente AI
+            </span>
+        </div>
+        <p id="ai-text" class="text-sm italic text-slate-700"></p>
+    </div>
+
+    <div id="list-attempts" class="flex flex-col-reverse"></div>
+
+    <div id="empty-msg" class="py-24 text-center opacity-30">
+        <p class="text-xl">Digita una parola</p>
+    </div>
+</main>
+
+<footer class="fixed bottom-0 left-0 right-0 p-6 bg-white/90 backdrop-blur-xl border-t flex justify-center z-50">
+    <div class="w-full max-w-md flex gap-3">
+        <input type="text" id="input-word" placeholder="Prova una parola..." class="input-rounded">
+        <button id="btn-send" class="btn-main">
+            <div class="loader" id="spin-loader"></div>
+            <span id="icon-send">➔</span>
+        </button>
+    </div>
+</footer>
+
+<script>
+    // --- Piccola configurazione iniziale ---
+    // Nota: potrei spostare queste parole su backend in futuro.
+    let paroleSegrete = []; // Ora le carichiamo da file esterno
+
+    let parolaDaIndovinare = "";
+    let partitaInCorso = false;
+    let storicoTentativi = [];
+
+    // --- Gestione indizi ---
+    let livelloIndizio = 0;
+    let ultimoIndizio = 0;
+
+    const ui = {
+        input: document.getElementById("input-word"),
+        sendBtn: document.getElementById("btn-send"),
+        loader: document.getElementById("spin-loader"),
+        icon: document.getElementById("icon-send"),
+        list: document.getElementById("list-attempts"),
+        empty: document.getElementById("empty-msg"),
+        aiBox: document.getElementById("ai-box"),
+        aiText: document.getElementById("ai-text"),
+        aiLabel: document.getElementById("ai-label"),
+        hintBtn: document.getElementById("btn-hint")
+    };
+
+    async function caricaParole() {
+        try {
+            const res = await fetch("parole.json"); // il file deve stare nella stessa cartella
+            paroleSegrete = await res.json();
+            console.log("Parole caricate dal file:", paroleSegrete);
+        } catch (err) {
+            console.warn("Non sono riuscito a caricare il file parole.json, uso fallback hardcoded 😅");
+            paroleSegrete = [
+                "viaggio", "montagna", "computer", "amicizia",
+                "espresso", "oceano", "stella", "giardino",
+                "isola", "foresta", "pizza", "libro"
+            ];
+        }
+    }
+
+    function avviaNuovaPartita() {
+        if (!paroleSegrete.length) {
+            console.error("Nessuna parola disponibile, non posso iniziare 😢");
+            return;
+        }
+
+        const index = Math.floor(Math.random() * paroleSegrete.length);
+        parolaDaIndovinare = paroleSegrete[index];
+
+        partitaInCorso = true;
+        storicoTentativi = [];
+        livelloIndizio = 0;
+
+        ui.list.innerHTML = "";
+        ui.aiBox.classList.remove("visible");
+        ui.empty.style.display = "flex";
+        ui.input.value = "";
+
+        console.log("Nuova parola scelta:", parolaDaIndovinare);
+    }
+
+    async function aiChat(prompt) {
+        await puter.ready;
+        const res = await puter.ai.chat({
+            prompt,
+            model: "gemini-pro"
+        });
+        return res.message.content;
+    }
+
+    async function calcolaDistanzaAI(parolaUtente) {
+        if (parolaUtente === parolaDaIndovinare) return 1;
+
+        try {
+            const testo = await aiChat(
+                `Calcola la distanza semantica tra "${parolaUtente}" e "${parolaDaIndovinare}". 
+                Rispondi solo con un numero tra 2 e 15000.`
+            );
+
+            const numero = parseInt(testo.replace(/\D/g, ""));
+            if (isNaN(numero)) throw "NaN";
+
+            ui.aiLabel.innerText = "Assistente AI (Cloud)";
+            return numero;
+
+        } catch {
+            ui.aiLabel.innerText = "Assistente (Offline)";
+            return Math.abs(parolaUtente.length - parolaDaIndovinare.length) * 500 + 2000;
+        }
+    }
+
+    function feedbackTestuale(d) {
+        if (d === 1) return "🏆 Vittoria";
+        if (d < 800) return "🔥 Bollente";
+        if (d < 3000) return "🙂 Vicino";
+        if (d < 7000) return "😐 Lontano";
+        return "🧊 Ghiacciato";
+    }
+
+    async function gestisciInvio() {
+        const parola = ui.input.value.trim().toLowerCase();
+        if (!parola || !partitaInCorso) return;
+
+        ui.loader.style.display = "block";
+        ui.icon.style.display = "none";
+
+        const distanza = await calcolaDistanzaAI(parola);
+
+        ui.loader.style.display = "none";
+        ui.icon.style.display = "block";
+        ui.input.value = "";
+
+        ui.empty.style.display = "none";
+
+        storicoTentativi.push({ parola, distanza });
+        aggiungiRiga(parola, distanza);
+
+        ui.aiBox.classList.add("visible");
+        ui.aiText.innerText = feedbackTestuale(distanza);
+
+        if (distanza === 1) finePartita();
+    }
+
+    function aggiungiRiga(parola, distanza) {
+        const percentuale = Math.max(5, 100 - (distanza / 15000 * 100));
+        let colore = distanza === 1 ? "#22c55e" : distanza < 1000 ? "#4ade80" : "#facc15";
+
+        const div = document.createElement("div");
+        div.className = "guess-row shadow-sm";
+        div.innerHTML = `
+            <div class="progress-bg" style="width:${percentuale}%;background:${colore};opacity:.3"></div>
+            <div class="content-z font-bold">
+                <span>${parola}</span>
+                <span>${feedbackTestuale(distanza)}</span>
+            </div>
+        `;
+        ui.list.appendChild(div);
+    }
+
+    function finePartita() {
+        partitaInCorso = false;
+        ui.aiText.innerText = "Grande! Hai trovato la parola: " + parolaDaIndovinare;
+        ui.aiBox.classList.add("visible");
+    }
+
+    // --- INDIZI PROGRESSIVI ---
+    ui.hintBtn.onclick = async function () {
+        const now = Date.now();
+        if (now - ultimoIndizio < 10000) {
+            ui.aiText.innerText = "Aspetta qualche secondo prima del prossimo indizio ⏳";
+            ui.aiBox.classList.add("visible");
+            return;
+        }
+
+        ultimoIndizio = now;
+        livelloIndizio++;
+
+        ui.aiBox.classList.add("visible");
+
+        if (livelloIndizio === 1) {
+            ui.aiText.innerText = "La parola ha " + parolaDaIndovinare.length + " lettere.";
+        } 
+        else if (livelloIndizio === 2) {
+            ui.aiText.innerText = "Inizia con la lettera: " + parolaDaIndovinare[0].toUpperCase();
+        } 
+        else {
+            try {
+                ui.aiText.innerText = await aiChat(
+                    `Dai un indizio concettuale sulla parola "${parolaDaIndovinare}" senza dirla.`
+                );
+            } catch {
+                ui.aiText.innerText = "Indizio AI non disponibile.";
+            }
+        }
+    };
+
+    ui.sendBtn.onclick = gestisciInvio;
+    ui.input.addEventListener("keydown", e => e.key === "Enter" && gestisciInvio());
+
+    // --- Avvio tutto dopo aver caricato le parole ---
+    caricaParole().then(avviaNuovaPartita);
+</script>
+</body>
+</html>
