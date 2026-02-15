@@ -29,8 +29,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; 
+    justify-content: flex-start; 
     min-height: 100vh;
+    padding-bottom: 100px; /* Spazio per i bottoni in basso */
 }
 
 /* Animazione titolo "snake wave" 
@@ -120,8 +121,8 @@ progetto che copiava a sua volta lo stile di google*/
 }
 
 /* Layout */
-header, main { width: 100%; max-width: 600px; text-align:center; }
-#list-attempts { max-height: 300px; overflow-y: auto; display:flex; flex-direction:column-reverse; gap:4px; }
+header, main { width: 100%; max-width: 600px; text-align:center; padding: 0 20px; }
+#list-attempts { max-height: 300px; overflow-y: auto; display:flex; flex-direction:column-reverse; gap:4px; width: 100%; }
 
 /* Pulsante indizio */
 #btn-hint { border-radius:999px; padding:8px 16px; background:white; border:1px solid var(--outlineColor); cursor:pointer; font-weight:bold; font-size:0.75rem; }
@@ -129,30 +130,64 @@ header, main { width: 100%; max-width: 600px; text-align:center; }
 /* Input box centrato */
 #input-container { width: 100%; max-width: 600px; display:flex; gap:12px; margin-top:32px; }
 
-/* Pannello statistiche */
-#stats-btn, #music-btn { position: fixed; bottom:24px; width:48px; height:48px; border-radius:50%; background:var(--primaryColor); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:60; }
-/* Li avviciniamo entrambi al centro */
-#stats-btn { right:72px; } 
-#music-btn { left:72px; }
-#stats-panel { position: fixed; bottom:0; left:0; right:0; max-width:600px; margin:auto; background:white; border-radius:2rem 2rem 0 0; padding:24px; transform:translateY(100%); transition: transform 0.3s; z-index:55; }
+/* Bottoni in basso centrati */
+.bottom-controls {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    z-index: 60;
+}
 
-/* Player YouTube */
-#music-panel { position:fixed; bottom:-110%; left:50%; transform:translateX(-50%); width:100%; max-width:600px; background:white; border-radius:2rem 2rem 0 0; padding:24px; transition:0.3s; z-index:50; }
+.circle-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--primaryColor);
+    color: white !important; /* Forza il colore bianco */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    font-size: 1.5rem;
+    transition: all 0.2s ease;
+    border: none;
+}
+.circle-btn:hover { transform: scale(1.05); background-color: #004d82; }
+.circle-btn:active { transform: scale(0.95); }
+
+#stats-panel, #music-panel { 
+    position: fixed; 
+    bottom: 0; 
+    left: 50%;
+    transform: translate(-50%, 100%); 
+    width: 100%;
+    max-width: 600px; 
+    background: white; 
+    border-radius: 2rem 2rem 0 0; 
+    padding: 24px; 
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    z-index: 70; 
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
+}
 </style>
 </head>
 
 <body>
 
-<header class="mt-6 mb-6 w-full max-w-md">
-    <h1 id="wave-title" class="wave-text text-6xl font-bold text-slate-800 mb-2"></h1>
+<header class="mt-6 mb-6">
+    <h1 id="wave-title" class="wave-text text-5xl md:text-6xl font-bold text-slate-800 mb-2"></h1>
     <p class="opacity-60 text-sm">Alimentato da Puter.js con Gemini</p>
     <div class="flex justify-center mt-4">
         <button id="btn-hint">💡 INDIZIO</button>
     </div>
 </header>
 
-<main class="w-full max-w-md flex flex-col items-center">
-    <div id="ai-box" class="ai-panel mb-6 border">
+<main class="flex flex-col items-center">
+    <div id="ai-box" class="ai-panel mb-6 border w-full">
         <div class="flex items-center gap-2 mb-2">
             <span>✨</span>
             <span id="ai-label" class="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -164,7 +199,7 @@ header, main { width: 100%; max-width: 600px; text-align:center; }
 
     <div id="list-attempts"></div>
 
-    <div id="empty-msg" class="py-24 text-center opacity-30 w-full">
+    <div id="empty-msg" class="py-12 text-center opacity-30 w-full">
         <p class="text-xl">Digita una parola</p>
     </div>
 
@@ -178,8 +213,13 @@ header, main { width: 100%; max-width: 600px; text-align:center; }
     </div>
 </main>
 
-<!-- Bottone e pannello statistiche -->
-<div id="stats-btn">📊</div>
+<!-- Controlli Inferiori Centrati -->
+<div class="bottom-controls">
+    <div id="music-btn" class="circle-btn" title="Musica">🎵</div>
+    <div id="stats-btn" class="circle-btn" title="Statistiche">📊</div>
+</div>
+
+<!-- Pannello Statistiche -->
 <div id="stats-panel">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-bold text-slate-800">Statistiche Personali</h2>
@@ -193,13 +233,12 @@ header, main { width: 100%; max-width: 600px; text-align:center; }
 </div>
 
 <!-- Player YouTube -->
-<div id="music-btn">🎵</div>
 <div id="music-panel">
     <div class="flex justify-between items-center mb-4">
-        <h3 class="font-bold text-lg">Music Player</h3>
+        <h3 class="font-bold text-lg text-slate-800">Music Player</h3>
         <button onclick="closeMusicPanel()" class="text-gray-500 font-bold text-xl">✕</button>
     </div>
-    <div class="flex gap-2 mb-4">
+    <div class="flex flex-col md:flex-row gap-2 mb-4">
         <input type="text" id="yt-url" placeholder="Incolla link YouTube..." class="input-rounded flex-1">
         <button onclick="loadVideo()" class="btn-main">CARICA</button>
     </div>
@@ -237,11 +276,11 @@ function updateStatsUI(){
     document.getElementById("stat-best-attempts").innerText=stats.bestAttempts!==null?stats.bestAttempts:"–";
     document.getElementById("stat-current-attempts").innerText=storicoTentativi.length;
 }
-function recordWin(){stats.totalWins++; if(stats.bestAttempts===null || storicoTentativi.length<stats.bestAttempts) stats.bestAttempts=storicoTentativi.length; saveStats(); updateStatsUI();}
 function toggleStatsPanel(){
     const p=document.getElementById("stats-panel");
-    const isOpen = p.style.transform === "translateY(0%)";
-    p.style.transform = isOpen ? "translateY(100%)" : "translateY(0%)";
+    const isOpen = p.style.transform === "translate(-50%, 0%)";
+    p.style.transform = isOpen ? "translate(-50%, 100%)" : "translate(-50%, 0%)";
+    if(!isOpen) closeMusicPanel(); // Chiudi il player se apri le stats
 }
 
 /* --- Player musicale YouTube --- */
@@ -250,9 +289,15 @@ function onYouTubeIframeAPIReady(){
     player=new YT.Player('player',{height:'100%',width:'100%',videoId:'n61ULEU7CO0',playerVars:{'autoplay':0,'controls':1,'modestbranding':1,'rel':0}});
 }
 var tag=document.createElement('script'); tag.src="https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
-function openMusicPanel(){document.getElementById('music-panel').style.bottom="0";}
-function closeMusicPanel(){document.getElementById('music-panel').style.bottom="-110%";}
+
+function openMusicPanel(){
+    document.getElementById('music-panel').style.transform="translate(-50%, 0%)";
+    const p=document.getElementById("stats-panel");
+    p.style.transform = "translate(-50%, 100%)"; // Chiudi le stats se apri il player
+}
+function closeMusicPanel(){document.getElementById('music-panel').style.transform="translate(-50%, 100%)";}
 function loadVideo(){let input=document.getElementById('yt-url').value; const regExp=/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/; const match=input.match(regExp); if(match&&match[2].length==11)player.loadVideoById(match[2]);}
+document.getElementById('music-btn').onclick = openMusicPanel;
 
 /* --- UI --- */
 const ui = {
@@ -266,13 +311,10 @@ const ui = {
     aiText: document.getElementById("ai-text"),
     aiLabel: document.getElementById("ai-label"),
     hintBtn: document.getElementById("btn-hint"),
-    statsBtn: document.getElementById("stats-btn"),
-    musicBtn: document.getElementById("music-btn")
+    statsBtn: document.getElementById("stats-btn")
 };
 
-/* --- Caricamento parole da file esterno --- 
-l'unica cosa che ho effettivamente 
-diviso dal resto perché stranamente non ha rotto nulla XD*/
+/* --- Caricamento parole --- */
 async function caricaParole(){
     try{ const res = await fetch("parole.json"); paroleSegrete = await res.json(); }
     catch{ paroleSegrete = ["viaggio","montagna","computer","amicizia","espresso","oceano","stella","giardino","isola","foresta","pizza","libro"]; }
@@ -287,7 +329,7 @@ function avviaNuovaPartita(){
     livelloIndizio = 0;
     ui.list.innerHTML = "";
     ui.aiBox.classList.remove("visible");
-    ui.empty.style.display = "flex";
+    ui.empty.style.display = "block";
     ui.input.value = "";
     console.log("Nuova parola scelta:", parolaDaIndovinare);
     updateStatsUI();
@@ -347,6 +389,16 @@ function aggiungiRiga(parola,distanza){
 }
 
 /* --- Fine partita --- */
+function recordWin(){
+    stats.totalWins++;
+    const currentAttempts = storicoTentativi.length;
+    if(stats.bestAttempts === null || currentAttempts < stats.bestAttempts){
+        stats.bestAttempts = currentAttempts;
+    }
+    saveStats();
+    updateStatsUI();
+}
+
 function finePartita(){
     partitaInCorso=false;
     ui.aiText.innerText="Grande! Hai trovato la parola: "+parolaDaIndovinare;
@@ -376,6 +428,10 @@ ui.hintBtn.onclick = async function(){
 ui.sendBtn.onclick = gestisciInvio;
 ui.input.addEventListener("keydown", e=>e.key==="Enter"&&gestisciInvio());
 ui.statsBtn.onclick = toggleStatsPanel;
-ui.musicBtn.onclick = openMusicPanel;
 
-/*
+/* --- Avvio --- */
+caricaParole().then(avviaNuovaPartita);
+loadStats();
+</script>
+</body>
+</html>
