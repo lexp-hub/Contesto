@@ -7,7 +7,7 @@ L’idea è semplice: devi **indovinare la parola segreta** usando i suggeriment
 
 # ⚡ Come funziona
 
-* All’avvio scelgo a caso una parola italiana da un array (tranquillo, niente backend complicato per ora 😅).
+* All’avvio una funzione sceglie a caso una parola italiana da un array (tranquillo, niente backend complicato per ora :D).
 * Scrivi una parola nella casella e premi invio o il pulsante ➔.
 * L’AI ti dice quanto sei vicino **semanticalmente** alla parola segreta (tipo “vicino” o “bollente” o “ghiacciato”).
 * Se indovini la parola, vittoria immediata! 🏆
@@ -21,7 +21,7 @@ C’è il pulsante **💡 INDIZIO** che ti aiuta progressivamente:
 
 1. Numero di lettere della parola
 2. Lettera iniziale
-3. Un indizio concettuale generato dall’AI (se l’AI non è disponibile, niente panico, ti dico solo “non disponibile” 😅)
+3. Un indizio concettuale generato dall’AI (se l’AI non è disponibile, niente panico, ti dico solo “non disponibile” ;) )
 
 Attenzione: **ogni indizio ha un cooldown di 10 secondi**, così non puoi spammarli tutti insieme.
 
@@ -30,7 +30,7 @@ Attenzione: **ogni indizio ha un cooldown di 10 secondi**, così non puoi spamma
 1. Promt dei comandi e "git clone https://github.com/lexp-hub/Contesto/"
 2. Apri la cartella sul tuo code editor preferito
 3. Configura un Live Server e accedi ad un account puter.js per giocare gratuitamente
-4. Divertiti! 😎
+4. Divertiti! XD
 
 
 # 🛠 Possibili migliorie future
