@@ -25,31 +25,18 @@ C’è il pulsante **💡 INDIZIO** che ti aiuta progressivamente:
 
 Attenzione: **ogni indizio ha un cooldown di 10 secondi**, così non puoi spammarli tutti insieme.
 
-
-# 🎨 Stile & struttura
-
-* Tutto è in **un unico file HTML**.
-
-  > Sì, lo so, di solito si divide in più file, ma con Puter.js non funzionava nulla 😅.
-  > Magari in futuro lo separo, per ora va bene così.
-
-* Usa **TailwindCSS** per lo stile rapido e **Puter.js v2 + Gemini** per l’AI.
-
-
 # 🚀 Come giocare
 
-1. Salva il file come `index.html`
-2. Aprilo in un browser moderno
-3. Assicurati di avere internet per far funzionare l’AI
+1. Promt dei comandi e "git clone https://github.com/lexp-hub/Contesto/"
+2. Apri la cartella sul tuo code editor preferito
+3. Configura un Live Server e accedi ad un account puter.js per giocare gratuitamente
 4. Divertiti! 😎
 
 
 # 🛠 Possibili migliorie future
 
-* Mettere le parole su un backend (così posso aggiornarle senza toccare il file HTML)
 * Sistema di punteggi o classifica
 * Modalità a tempo o livelli di difficoltà
-* Dividere il codice in più file per essere più ordinati
 
 
 # 🏁 Stato attuale
