@@ -12,41 +12,48 @@
     --shadow: rgba(0, 0, 0, 0.08);
 }
 
-/* --- Layout & Background --- */
+/* --- Layout Base --- */
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: #F7F2FA;
+    background-color: var(--surface);
     color: var(--on-surface);
     margin: 0;
     min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: stretch;
+    flex-direction: column;
+    align-items: center;
     overflow-x: hidden;
     user-select: none;
+    -webkit-tap-highlight-color: transparent;
     background-image: 
         radial-gradient(circle at 2px 2px, rgba(103, 80, 164, 0.03) 1px, transparent 0);
     background-size: 32px 32px;
 }
 
+/* --- Header con Pattern Grafico --- */
 .pattern-bg {
     background: linear-gradient(135deg, #6750A4 0%, #433685 100%);
     position: relative;
     overflow: hidden;
+    width: 100%;
     padding: 3rem 1rem;
-    border-radius: 0 0 32px 32px;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+    border-radius: 0 0 40px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 .pattern-bg::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0);
+    background-image: 
+        radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0);
     background-size: 24px 24px;
 }
 
-/* --- Visualizzatore Radio (Equalizzatore) --- */
+/* --- Visualizzatore Radio (Equalizzatore Animato) --- */
 .radio-visualizer {
     display: flex;
     align-items: flex-end;
@@ -58,42 +65,102 @@ body {
 .visualizer-bar {
     width: 4px;
     height: 10px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 10px;
     animation: bar-bounce 1s ease-in-out infinite;
 }
 
-.visualizer-bar:nth-child(2) { animation-delay: 0.2s; }
-.visualizer-bar:nth-child(3) { animation-delay: 0.4s; }
-.visualizer-bar:nth-child(4) { animation-delay: 0.1s; }
-.visualizer-bar:nth-child(5) { animation-delay: 0.3s; }
+.visualizer-bar:nth-child(1) { animation-delay: 0.1s; }
+.visualizer-bar:nth-child(2) { animation-delay: 0.3s; }
+.visualizer-bar:nth-child(3) { animation-delay: 0.5s; }
+.visualizer-bar:nth-child(4) { animation-delay: 0.2s; }
+.visualizer-bar:nth-child(5) { animation-delay: 0.4s; }
 
 @keyframes bar-bounce {
-    0%, 100% { height: 8px; }
-    50% { height: 28px; background: #EADDFF; }
+    0%, 100% { 
+        height: 8px; 
+        background: rgba(255, 255, 255, 0.4);
+    }
+    50% { 
+        height: 28px; 
+        background: #EADDFF; 
+    }
 }
 
-/* --- Glassmorphism & Cards --- */
+/* --- Componenti Glassmorphism --- */
 .glass-panel {
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
+    border-radius: 24px;
+    padding: 20px;
     transition: all 0.3s ease;
 }
 
+/* --- Card del Gioco --- */
 .game-card {
     background: white;
-    border-radius: 28px;
+    border-radius: 32px;
     box-shadow: 0 4px 20px var(--shadow);
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     border: 1px solid rgba(0, 0, 0, 0.03);
+    overflow: hidden;
 }
 
 .game-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 12px 30px rgba(103, 80, 164, 0.12);
+}
+
+/* --- Griglia e Celle --- */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+.cell {
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.25rem;
+    border-radius: 18px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cell.selected {
+    transform: scale(0.85);
+    border-radius: 50%;
+    box-shadow: 0 8px 16px rgba(103, 80, 164, 0.25);
+}
+
+/* --- Bottoni Material 3 --- */
+.md-button {
+    background-color: var(--primary);
+    color: white;
+    padding: 18px 48px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 8px 15px rgba(103, 80, 164, 0.2);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.md-button:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 12px 20px rgba(103, 80, 164, 0.3);
+}
+
+.md-button:active {
+    transform: scale(0.95);
 }
 
 /* --- Animazioni --- */
@@ -106,20 +173,35 @@ body {
     50% { transform: translateY(-10px); }
 }
 
-/* --- Bottoni Material 3 --- */
-.md-button {
-    background-color: var(--primary);
-    color: white;
-    padding: 18px 48px;
-    border-radius: 100px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 8px 15px rgba(103, 80, 164, 0.2);
-    transition: all 0.3s ease;
+.fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.md-button:active {
-    transform: scale(0.95);
-    box-shadow: 0 4px 10px rgba(103, 80, 164, 0.3);
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* --- Overlay Game Over --- */
+#game-over-overlay {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+}
+
+/* --- Palette Colori Valori Celle --- */
+.val-2 { background-color: #EADDFF; color: #21005D; }
+.val-4 { background-color: #D0BCFF; color: #21005D; }
+.val-8 { background-color: #B1A7FF; color: #000; }
+.val-16 { background-color: #7C71FF; color: #FFF; }
+.val-32 { background-color: #6750A4; color: #FFF; }
+.val-64 { background-color: #4F378B; color: #FFF; }
+.val-128 { background-color: #381E72; color: #FFF; }
+.val-256 { background-color: #21005D; color: #FFF; }
+
+/* --- Mobile Adaptations --- */
+@media (max-width: 640px) {
+    .pattern-bg {
+        padding: 2rem 1rem 3rem;
+        border-radius: 0 0 32px 32px;
+    }
 }
